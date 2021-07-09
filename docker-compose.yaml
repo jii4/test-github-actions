@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13-alpine
+    container_name: test-github-actions-db
+    hostname: test-github-actions-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: test_github_actions
+      POSTGRES_PASSWORD: test_github_actions
+      POSTGRES_DB: test_github_actions
+    networks:
+      - test-github-actions-network
+    volumes:
+      - db_volume_test_github_actions:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer:latest
+    container_name: test-github-actions-adminer
+    hostname: test-github-actions-adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    networks:
+      - test-github-actions-network
+
+  nginx:
+    image: nginx:latest
+    container_name: test-github-actions-nginx
+    hostname: test-github-actions-nginx
+    ports:
+      - 80:80
+    depends_on:
+      - adminer
+    networks:
+      - test-github-actions-network
+    volumes:
+      - nginx_volume_test_github_actions:/etc/nginx
+
+networks:
+  test-github-actions-network:
+    driver: bridge
+
+volumes:
+  db_volume_test_github_actions:
+  nginx_volume_test_github_actions:
